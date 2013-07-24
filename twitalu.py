@@ -18,11 +18,10 @@ if globals.no_hardware == True:
 	import twitalu_Math_dev as tMath
 else:
 	import twitalu_Math as tMath
+	init.init()
 
 while(1):
-	init.init()
-	
-	tweets = twitter.get_jobs()
+	tweets = twitter.get_tweets()
 	
 	[tweet_queue, work] = twitter.input_scrub(tweets)
 	

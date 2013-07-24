@@ -19,8 +19,3 @@ def init():
 	RegADD.init()
 	ALU.init()
 	globals.init()
-	
-while True:
-	init()
-	break
-	

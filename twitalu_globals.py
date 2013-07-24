@@ -11,3 +11,8 @@ def init():
 	debug = False
 	systemDelayTime = 1
 	no_hardware = True
+	
+while True:
+	init()
+	break
+	

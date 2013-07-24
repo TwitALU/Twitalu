@@ -8,9 +8,9 @@ import time
 # Let's initialise some objects that we need. Yes, i know about the has salt. I had to.
 twitter = Twython('74GqRHU1JaPvrKx6SHQ4w', '3EL0biFCRuJGLf5ttZ3W6T6ovMsd2JoK3H1QM9GE', '1543952911-NFuG7CC8KF4NxdudU5ZNBlZcNmRhoCPJY673Ehk', 'hCkiPne3tBxlRQ4Qr9UKer0Op8tqwH5QZIu6OilPnU')
 hashids = Hashids(salt='OUTATIME')
-re_cmd = re.compile('@twittithmetic\s*([a][:]\d+)\s*([o][:]ADD|[o][:]SUB|[o][:]DIV|[o][:]MUL)\s*([b][:]\d+)\s*',re.IGNORECASE)
+re_cmd = re.compile('@twittithmetic\s*(\d+)\s*([\+]|[\-]|[\/]|[\*]|AND|OR|XOR|ROR|ROL)\s*(\d+)\s*',re.IGNORECASE)
 
-def get_jobs():
+def get_tweets():
 	# Initialise the object for storing tweets that need processing and open the last_id processed file
 	# If starting the system after a long down time it is recomended to blank the last_id file to a single space character
 	# We could do it as a cron job to be honest or something like that
@@ -18,8 +18,8 @@ def get_jobs():
 	last_id = id_file.read()
 	id_file.close()
 	
-	job_queue = {}
-	job_number = 0
+	tweets = {}
+	tweet_number = 0
 	
 	print()
 	print("***Retrieveing Timelines***")
@@ -57,7 +57,7 @@ def get_jobs():
 	# First loop selects a job from the mentions list	
 	for x in range(0, len(mentions_timeline)):
 		print("|_ Looking for job ID: {0}".format(mentions_timeline[x]["id_str"]))
-		job_flag = 0
+		tweet_flag = 0
 		
 		#Second loop scans through the list of job responses that have been sent
 		for y in range(0, len(home_timeline)):
@@ -65,29 +65,29 @@ def get_jobs():
 			if home_timeline[y]["in_reply_to_status_id_str"] == mentions_timeline[x]["id_str"]:
 				# If the id is seen in both lists then mark it as done.
 				print("|__ ID match found. Job complete: {0}".format(mentions_timeline[x]["id_str"]))
-				job_flag = 1
+				tweet_flag = 1
 		
 		# If the flag isn't set after checking all responses then the job of interest hasn't been processed yet
-		if job_flag == 0:
+		if tweet_flag == 0:
 			print("|__ No ID match found. Job not complete: {0}".format(mentions_timeline[x]["id_str"]))
-			job_queue[job_number] = mentions_timeline[x]
-			job_number = job_number + 1
+			tweets[tweet_number] = mentions_timeline[x]
+			tweet_number = tweet_number + 1
 			
 	print()
 	print("***Tweet queue***")
-	for z in range(0, len(job_queue)):
-		print(job_queue[z]["text"])
+	for z in range(0, len(tweets)):
+		print(tweets[z]["text"])
 	
-	if len(job_queue) > 0:
+	if len(tweets) > 0:
 		print()
-		print("Storing last job ID: {0}".format(job_queue[0]["id"]))
+		print("Storing last job ID: {0}".format(tweets[0]["id"]))
 		id_file = open("last_id.txt", "wt")
-		id_file.write(job_queue[0]["id_str"])
+		id_file.write(tweets[0]["id_str"])
 		id_file.close()
 	
-	return job_queue
+	return tweets
 		
-def send_response(job_queue, work, final_key):
+def send_response(tweet_queue, work, final_key):
 	# This could cause a problem as the system will sit in here sending responses for potentially a long time.
 	# Not alot can be done as we're rate limited by the Twitter API anyway so it takes as long as it takes.
 	
@@ -98,19 +98,19 @@ def send_response(job_queue, work, final_key):
 		for i in range(0, int(final_key) + 1):
 			print("|_ Job number: {0}".format(i))
 			try:
-				tweet_author = job_queue[i]["user"]
+				tweet_author = tweet_queue[i]["user"]
 				tweet_author_screen_name = tweet_author["screen_name"]
 				tweet_author_name = tweet_author["name"]
-				mention_id_hash = hashids.encrypt(job_queue[i]["id"])[0:8]
+				mention_id_hash = hashids.encrypt(tweet_queue[i]["id"])[0:8]
 					
 				status_update = "@{0} Hello {1}, Your solution is {3} [{2}]".format(tweet_author_screen_name, tweet_author_name, mention_id_hash,(work[i]["4"])[2:])
 					
-				print("|__ Mention ID: {0}  Mention ID Hash: {1}".format(job_queue[i]["id_str"], mention_id_hash))
-				print("|__ Input from: @{0} Content: {1}".format(tweet_author_screen_name, job_queue[i]["text"]))	
+				print("|__ Mention ID: {0}  Mention ID Hash: {1}".format(tweet_queue[i]["id_str"], mention_id_hash))
+				print("|__ Input from: @{0} Content: {1}".format(tweet_author_screen_name, tweet_queue[i]["text"]))	
 				print("|___ Response generated: {0}".format(status_update))
 						
 				try:
-					twitter.update_status(in_reply_to_status_id = job_queue[i]["id_str"], status = status_update)
+					twitter.update_status(in_reply_to_status_id = tweet_queue[i]["id_str"], status = status_update)
 				except TwythonError as e:
 					print(e)
 					
