@@ -10,7 +10,7 @@ def init():
 	Y = 0
 	debug = False
 	systemDelayTime = 1
-	no_hardware = True
+	no_hardware = False
 	
 while True:
 	init()

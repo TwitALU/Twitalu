@@ -47,7 +47,7 @@ while(1):
 				result = tMath.calculate(work[i]["1"],work[i]["2"],work[i]["3"])
 				print("|____ Result: {0}".format(result))
 				print("|_____ Action: Format for insertion")
-				result_str = "s:{0}".format(result)
+				result_str = "{0}".format(result)
 				print("|______Result: {0}".format(result_str))
 				work[i]["4"] = result_str
 			except:

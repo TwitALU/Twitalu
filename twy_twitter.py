@@ -103,7 +103,7 @@ def send_response(tweet_queue, work, final_key):
 				tweet_author_name = tweet_author["name"]
 				mention_id_hash = hashids.encrypt(tweet_queue[i]["id"])[0:8]
 					
-				status_update = "@{0} Hello {1}, Your solution is {3} [{2}]".format(tweet_author_screen_name, tweet_author_name, mention_id_hash,(work[i]["4"])[2:])
+				status_update = "@{0} Hello {1}, Your solution is {3} [{2}]".format(tweet_author_screen_name, tweet_author_name, mention_id_hash, work[i]["4"])
 					
 				print("|__ Mention ID: {0}  Mention ID Hash: {1}".format(tweet_queue[i]["id_str"], mention_id_hash))
 				print("|__ Input from: @{0} Content: {1}".format(tweet_author_screen_name, tweet_queue[i]["text"]))	
@@ -118,14 +118,14 @@ def send_response(tweet_queue, work, final_key):
 				print("|__ No work at this position.")
 				print("|___ Conclusion: Work exists later in queue")
 				
-			time.sleep(10)
+			time.sleep(20)
 			
 	else:
 		print("|_ Response queue empty.")
 		print("|__ Conclusion: No responses")
 					
 	if len(work) == 0:
-		time.sleep(70)
+		time.sleep(80)
 		
 def input_scrub(tweets):
 	job_number = len(tweets)
@@ -149,7 +149,7 @@ def input_scrub(tweets):
 			temp["2"] = cmd.group(2)
 			print("|__ Group 3: {0}".format( cmd.group(3) ))
 			temp["3"] = cmd.group(3)
-			temp["4"] = 's:0'
+			temp["4"] = '0'
 			commands[i] = {}
 			commands[i].update(temp)
 		except:

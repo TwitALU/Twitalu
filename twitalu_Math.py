@@ -13,20 +13,30 @@ import twitalu_globals as globals
 
 def calculate(numA, operation, numB):
 	# Remove defining characters, convert to int
-	numA = int(numA[2:])
-	numB = int(numB[2:])
-	operation = operation[2:]
+	numA = int(numA)
+	numB = int(numB)
+	operation = operation
 	operation = operation.lower()
 		
 	# Decode operation and calculate
-	if operation == "add":
-		result = tMath.Add(numA, numB)
-	elif operation == "sub":
-		result = tMath.Sub(numA, numB)
-	elif operation == "mul":
-		result = tMath.Mult(numA, numB)
-	elif operation == "div":
-		result = tMath.Div(numA, numB)
+	if operation == "+":
+		result = Add(numA, numB)
+	elif operation == "-":
+		result = Sub(numA, numB)
+	elif operation == "*":
+		result = Mult(numA, numB)
+	elif operation == "/":
+		result = Div(numA, numB)
+	elif operation == "AND":
+		result = AND(numA, numB)
+	elif operation == "OR":
+		result = OR(numA, numB)
+	elif operation == "XOR":
+		result = XOR(numA, numB)
+	elif operation == "ROR":
+		result = Shift_r(numA, numB)
+	elif operation == "ROL":
+		result = Shift_l(numA, numB)
 		
 	# Return answer
 	return(result)
