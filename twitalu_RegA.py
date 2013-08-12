@@ -23,6 +23,7 @@ import sys
 # appends to PYTHONPATH the location of the example codes
 sys.path.append(r'/home/pi/git/quick2wire-python-api/')
 import twitalu_I2C as I2C
+import twitalu_globals as globals
 
 # Defines
 port_expand_A_addr = 0x20
@@ -37,7 +38,36 @@ def init():
 
 # This function writes 8 bits to Port A
 def write_port(data):
-	I2C.write_data(port_expand_A_addr, 'A', data)
+	if globals.twitalu_v01_fixes == False:
+		I2C.write_data(port_expand_A_addr, 'A', data)
+	elif globals.twitalu_v01_fixes == True:
+		# strip the incorrect bits
+		bit0 = 0b00000001 & data
+		bit1 = 0b00000010 & data
+		bit2 = 0b00000100 & data
+		bit3 = 0b00001000 & data
+		
+		# make copies of all bits
+		bit0_copy = bit0
+		bit1_copy = bit1
+		bit2_copy = bit2
+		bit3_copy = bit3
+		
+		# shift incorrect bits so they sit properly
+		bit0 = bit1_copy >> 1
+		bit1 = bit0_copy << 1
+		bit2 = bit3_copy >> 1
+		bit3 = bit2_copy << 1
+		
+		# reconstruct data
+		data = data & 0xF0
+		data = data | bit0
+		data = data | bit1
+		data = data | bit2
+		data = data | bit3
+		
+		# write corrected data to port expander
+		I2C.write_data(port_expand_A_addr, 'A', data)
 
 # This function clears Port A
 def clear_port():

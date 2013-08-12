@@ -43,7 +43,7 @@ def clock_data():
 def read_register():
 	I2C.write_data(port_expand_ADD_addr, 'B', 0b00000010) # enable ADD OUT buffer
 	data = I2C.read_data(port_expand_ADD_addr, 'A')
-	I2C.write_data(port_expand_ADD_addr, 'B', 0b00000011) # disable ADD OUT buffer
+	# I2C.write_data(port_expand_ADD_addr, 'B', 0b00000011) # disable ADD OUT buffer
 	return data
 	
 # This function passes the ADD_IN bus to the ADL bus, clock_data() must be called first

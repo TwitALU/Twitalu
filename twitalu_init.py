@@ -11,6 +11,7 @@ import twitalu_RegADD as RegADD
 import twitalu_ALU as ALU
 import twitalu_globals as globals
 import twitalu_Math as tMath
+import nixie
 
 def init():
 	# Initialise everything
@@ -19,3 +20,4 @@ def init():
 	RegADD.init()
 	ALU.init()
 	globals.init()
+	nixie.init()
