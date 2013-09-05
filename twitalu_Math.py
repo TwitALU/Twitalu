@@ -29,9 +29,7 @@ def calculate(numA, operation, numB):
 	operation = operation.lower()
 	
 	# For the sake of getting it done and because the relays get stuck sometimes
-	# the RPi calculates and feeds back the result. Problems can still occur with
-	# * and / where it gets stuck in the initial hw calculation loop. Not a lot
-	# that can be done.
+	# the RPi calculates and feeds back the result.
 	
 	# Decode operation and calculate
 	if operation == "+":
@@ -178,6 +176,8 @@ def Mult(num1, num2):
 	result = 0
 	result2 = 0
 	result3 = 0
+	
+	# Swaps numbers to keep the repitions as low as possible
 	if num2 > num1:
 		num1 = num1 + num2
 		num2 = num1 - num2
@@ -185,6 +185,7 @@ def Mult(num1, num2):
 		# temp = num1
 		# num1 = num2
 		# num2 = temp
+		
 	for x in range(0, num2):
 		result3 = result2
 		result2 = result
