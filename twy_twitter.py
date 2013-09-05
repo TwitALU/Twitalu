@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 from twython import Twython, TwythonError
+import twitalu_OPCODE_display as OPCODE_display
 from hashids import Hashids
+import nixie
 import re
 import time
 
@@ -94,6 +96,7 @@ def send_response(tweet_queue, work, final_key):
 	print()
 	print("***Processing Responses***")
 	
+	
 	if len(work) > 0:
 		for i in range(0, int(final_key) + 1):
 			print("|_ Job number: {0}".format(i))
@@ -102,13 +105,17 @@ def send_response(tweet_queue, work, final_key):
 				tweet_author_screen_name = tweet_author["screen_name"]
 				tweet_author_name = tweet_author["name"]
 				mention_id_hash = hashids.encrypt(tweet_queue[i]["id"])[0:8]
-					
+				
 				status_update = "@{0} Hello {1}, Your solution is {3} [{2}]".format(tweet_author_screen_name, tweet_author_name, mention_id_hash, work[i]["4"])
 					
 				print("|__ Mention ID: {0}  Mention ID Hash: {1}".format(tweet_queue[i]["id_str"], mention_id_hash))
 				print("|__ Input from: @{0} Content: {1}".format(tweet_author_screen_name, tweet_queue[i]["text"]))	
 				print("|___ Response generated: {0}".format(status_update))
-						
+				
+				time.sleep(2)
+				OPCODE_display.display_twit_send()
+				time.sleep(4)
+				
 				try:
 					twitter.update_status(in_reply_to_status_id = tweet_queue[i]["id_str"], status = status_update)
 				except TwythonError as e:
@@ -117,15 +124,21 @@ def send_response(tweet_queue, work, final_key):
 			except:
 				print("|__ No work at this position.")
 				print("|___ Conclusion: Work exists later in queue")
-				
-			time.sleep(20)
+			
+			OPCODE_display.display_wait()
+			time.sleep(3)
+			OPCODE_display.countdown(0x11)
+			time.sleep(17)
 			
 	else:
 		print("|_ Response queue empty.")
 		print("|__ Conclusion: No responses")
 					
 	if len(work) == 0:
-		time.sleep(80)
+		OPCODE_display.display_wait()
+		time.sleep(3)
+		OPCODE_display.countdown(0x4B)
+		time.sleep(75)
 		
 def input_scrub(tweets):
 	job_number = len(tweets)
@@ -150,6 +163,7 @@ def input_scrub(tweets):
 			print("|__ Group 3: {0}".format( cmd.group(3) ))
 			temp["3"] = cmd.group(3)
 			temp["4"] = '0'
+			temp["5"] = '0'
 			commands[i] = {}
 			commands[i].update(temp)
 		except:

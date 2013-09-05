@@ -10,23 +10,26 @@ import math
 import random
 
 # Here the address blocks for the tube displays
+# Adder hold register display
 d1_m1 = 0x08
 d1_m2 = 0x09
 d1_m3 = 0x0a
 d1_m4 = 0x0b
 d1_m5 = 0x0c
 
-d2_m1 = 0x08
-d2_m2 = 0x09
-d2_m3 = 0x0a
-d2_m4 = 0x0b
-d2_m5 = 0x0c
+# Register A display
+d2_m1 = 0x2B
+d2_m2 = 0x2C
+d2_m3 = 0x2D
+d2_m4 = 0x2E
+d2_m5 = 0x2F
 
-d3_m1 = 0x08
-d3_m2 = 0x09
-d3_m3 = 0x0a
-d3_m4 = 0x0b
-d3_m5 = 0x0c
+#Register B display
+d3_m1 = 0x30
+d3_m2 = 0x31
+d3_m3 = 0x32
+d3_m4 = 0x33
+d3_m5 = 0x35
 
 # The following save the addresses of some of the registers in the port expander that we will need
 char_reg = 0x00 #[rw] 
@@ -42,7 +45,7 @@ fw_rev = 0x0F #[rd]
 
 def init():
 	blank_display()
-	dim_display(75)
+	dim_display(0x75)
 
 # This function writes a value into a register 
 # This is an internal functions and should not be used outside of this file
@@ -100,7 +103,7 @@ def blank_display(disp = 0):
 	if(disp == 1):
 		# Make sure the burn in routine is stopped as it overrides the blank
 		write_data(d1_m1, command_reg, 0x02)
-		write_data(d1_m1, command_reg, 0x02)
+		write_data(d1_m2, command_reg, 0x02)
 		write_data(d1_m3, command_reg, 0x02)
 		write_data(d1_m4, command_reg, 0x02)
 		write_data(d1_m5, command_reg, 0x02)
@@ -266,101 +269,149 @@ def module_info(disp = 0):
 
 # Use this to write a vlue out to a display. [Min value: 00000 Max value: 99999]
 # Time between values being written is randomly generated for effect
+# Should also turn on the correct comma for numbers >1000 but seems broken
 def write_value(value, disp = 0):
 	if(value > 99999):
 		print("nixie.write_value says: value out of range [++]")
-	if(value < 00000):
+	if(value < -99999):
 		print("nixie.write_value says: value out of range [--]")
 		
+	temp = math.fabs(value)
+		
 	if(disp == 1):
-		m5 = math.floor(value / 10000)
-		print(m5)
-		write_data(d1_m5, char_reg, m5)
+		m5 = math.floor(temp / 10000)
+		#print(m5)
 		write_data(d1_m5, command_reg, 0x02)
+		if(value < 0):
+			#print("we got a minus")
+			write_data(d1_m5, char_reg, (0b10000000 | m5))
+		else:
+			#print("we got a plus")
+			write_data(d1_m5, char_reg, m5)
+		#write_data(d1_m5, command_reg, 0x02)
 		time.sleep(random.random())
 		
-		m4 = math.floor( (value - (m5*10000)) / 1000)
-		print(m4)
-		write_data(d1_m4, char_reg, m4)
+		m4 = math.floor( (temp - (m5*10000)) / 1000)
+		#print(m4)
 		write_data(d1_m4, command_reg, 0x02)
+		write_data(d1_m4, char_reg, m4)
+		#write_data(d1_m4, command_reg, 0x02)
 		time.sleep(random.random())
 		
-		m3 = math.floor( (value - (m4*1000) - (m5*10000)) / 100)
-		print(m3)
-		write_data(d1_m3, char_reg, m3)
+		m3 = math.floor( (temp - (m4*1000) - (m5*10000)) / 100)
+		#print(m3)
 		write_data(d1_m3, command_reg, 0x02)
+		if(m3 > 0):
+			print("comma needed")
+			write_data(d1_m3, char_reg, (m3 | 0b01000000))
+		else:
+			print("comma not needed")
+			write_data(d1_m3, char_reg, m3)
+		#write_data(d1_m3, command_reg, 0x02)
 		time.sleep(random.random())
 		
-		m2 = math.floor( (value - (m3*100) - (m4*1000) - (m5*10000)) / 10)
-		print(m2)
-		write_data(d1_m2, char_reg, m2)
+		m2 = math.floor( (temp - (m3*100) - (m4*1000) - (m5*10000)) / 10)
+		#print(m2)
 		write_data(d1_m2, command_reg, 0x02)
+		write_data(d1_m2, char_reg, m2)
+		#write_data(d1_m2, command_reg, 0x02)
 		time.sleep(random.random())
 		
-		m1 = math.floor( (value - (m2*10) - (m3*100) - (m4*1000) - (m5*10000)) / 1)
-		print(m1)
-		write_data(d1_m1, char_reg, m1)
+		m1 = math.floor( (temp - (m2*10) - (m3*100) - (m4*1000) - (m5*10000)) / 1)
+		#print(m1)
 		write_data(d1_m1, command_reg, 0x02)
+		write_data(d1_m1, char_reg, m1)
+		#write_data(d1_m1, command_reg, 0x02)
 
 	elif(disp == 2):
-		m5 = math.floor(value / 10000)
-		print(m5)
-		write_data(d2_m5, char_reg, m5)
+		m5 = math.floor(temp / 10000)
+		#print(m5)
 		write_data(d2_m5, command_reg, 0x02)
+		if(value < 0):
+			#print("we got a minus")
+			write_data(d2_m5, char_reg, (0b10000000 | m5))
+		else:
+			#print("we got a plus")
+			write_data(d2_m5, char_reg, m5)
+		#write_data(d2_m5, command_reg, 0x02)
 		time.sleep(random.random())
 		
-		m4 = math.floor( (value - (m5*10000)) / 1000)
-		print(m4)
-		write_data(d2_m4, char_reg, m4)
+		m4 = math.floor( (temp - (m5*10000)) / 1000)
+		#print(m4)
 		write_data(d2_m4, command_reg, 0x02)
+		write_data(d2_m4, char_reg, m4)
+		#write_data(d2_m4, command_reg, 0x02)
 		time.sleep(random.random())
 		
-		m3 = math.floor( (value - (m4*1000) - (m5*10000)) / 100)
-		print(m3)
-		write_data(d2_m3, char_reg, m3)
+		m3 = math.floor( (temp - (m4*1000) - (m5*10000)) / 100)
+		#print(m3)
 		write_data(d2_m3, command_reg, 0x02)
+		if(m3 > 0):
+			print("comma needed")
+			write_data(d2_m3, char_reg, (m3 | 0b01000000))
+		else:
+			print("comma not needed")
+			write_data(d2_m3, char_reg, m3)
+		#write_data(d2_m3, command_reg, 0x02)
 		time.sleep(random.random())
 		
-		m2 = math.floor( (value - (m3*100) - (m4*1000) - (m5*10000)) / 10)
-		print(m2)
-		write_data(d2_m2, char_reg, m2)
+		m2 = math.floor( (temp - (m3*100) - (m4*1000) - (m5*10000)) / 10)
+		#print(m2)
 		write_data(d2_m2, command_reg, 0x02)
+		write_data(d2_m2, char_reg, m2)
+		#write_data(d2_m2, command_reg, 0x02)
 		time.sleep(random.random())
 		
-		m1 = math.floor( (value - (m2*10) - (m3*100) - (m4*1000) - (m5*10000)) / 1)
-		print(m1)
-		write_data(d2_m1, char_reg, m1)
+		m1 = math.floor( (temp - (m2*10) - (m3*100) - (m4*1000) - (m5*10000)) / 1)
+		#print(m1)
 		write_data(d2_m1, command_reg, 0x02)
+		write_data(d2_m1, char_reg, m1)
+		#write_data(d2_m1, command_reg, 0x02)
 		
 	elif(disp == 3):
-		m5 = math.floor(value / 10000)
-		print(m5)
-		write_data(d3_m5, char_reg, m5)
+		m5 = math.floor(temp / 10000)
+		#print(m5)
 		write_data(d3_m5, command_reg, 0x02)
+		if(value < 0):
+			#print("we got a minus")
+			write_data(d3_m5, char_reg, (0b10000000 | m5))
+		else:
+			#print("we got a plus")
+			write_data(d3_m5, char_reg, m5)
+		#write_data(d3_m5, command_reg, 0x02)
 		time.sleep(random.random())
 		
-		m4 = math.floor( (value - (m5*10000)) / 1000)
-		print(m4)
-		write_data(d3_m4, char_reg, m4)
+		m4 = math.floor( (temp - (m5*10000)) / 1000)
+		#print(m4)
 		write_data(d3_m4, command_reg, 0x02)
+		write_data(d3_m4, char_reg, m4)
+		#write_data(d3_m4, command_reg, 0x02)
 		time.sleep(random.random())
 		
-		m3 = math.floor( (value - (m4*1000) - (m5*10000)) / 100)
-		print(m3)
-		write_data(d3_m3, char_reg, m3)
+		m3 = math.floor( (temp - (m4*1000) - (m5*10000)) / 100)
+		#print(m3)
 		write_data(d3_m3, command_reg, 0x02)
+		if(m3 > 0):
+			print("comma needed")
+			write_data(d3_m3, char_reg, (m3 | 0b01000000))
+		else:
+			print("comma not needed")
+			write_data(d3_m3, char_reg, m3)
+		#write_data(d3_m3, command_reg, 0x02)
 		time.sleep(random.random())
 		
-		m2 = math.floor( (value - (m3*100) - (m4*1000) - (m5*10000)) / 10)
-		print(m2)
-		write_data(d3_m2, char_reg, m2)
+		m2 = math.floor( (temp - (m3*100) - (m4*1000) - (m5*10000)) / 10)
+		#print(m2)
 		write_data(d3_m2, command_reg, 0x02)
+		write_data(d3_m2, char_reg, m2)
+		#write_data(d3_m2, command_reg, 0x02)
 		time.sleep(random.random())
 		
-		m1 = math.floor( (value - (m2*10) - (m3*100) - (m4*1000) - (m5*10000)) / 1)
-		print(m1)
-		write_data(d3_m1, char_reg, m1)
+		m1 = math.floor( (temp - (m2*10) - (m3*100) - (m4*1000) - (m5*10000)) / 1)
+		#print(m1)
 		write_data(d3_m1, command_reg, 0x02)
+		write_data(d3_m1, char_reg, m1)
+		##write_data(d3_m1, command_reg, 0x02)
 	else:
 		print("nixie.write_value says: no argument passed chief...")
 
