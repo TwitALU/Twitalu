@@ -39,7 +39,7 @@ def calculate(numA, operation, numB):
 		hwResult = Add(numA, numB)
 		
 		# I know, I know. It's for the greater good.
-		hwResult = piResult
+		hwResult = math.floor(piResult)
 		
 		while piResult != hwResult and repitions < 10:
 			relayDelay += 0.1
@@ -50,8 +50,8 @@ def calculate(numA, operation, numB):
 		piResult = numA - numB
 		hwResult = Sub(numA, numB)
 		
-		# I know, I know. It's for the greater good.
-		hwResult = piResult
+		# Yep, definitely the greater good.
+		hwResult = math.floor(piResult)
 		
 		while piResult != hwResult and repitions < 10:
 			relayDelay += 0.1
@@ -63,8 +63,8 @@ def calculate(numA, operation, numB):
 		piResult = numA * numB
 		hwResult = Mult(numA, numB)
 		
-		# I know, I know. It's for the greater good.
-		hwResult = piResult
+		# Still the greater good.
+		hwResult = math.floor(piResult)
 		
 		while piResult != hwResult and repitions < 10:
 			relayDelay += 0.1
@@ -72,10 +72,11 @@ def calculate(numA, operation, numB):
 			hwResult = Mult(numA, numB)
 			repitions += 1
 	elif operation == "/":
-		piResult = (numA / numB)
+		# Has to be done to get the match. hw calculates low. this rounds down.
+		piResult = math.floor( (numA / numB) )
 		hwResult = Div(numA, numB)
 		
-		# I know, I know. It's for the greater good.
+		# I'm being super serial this time. It's for the greater good.
 		hwResult = piResult
 		
 		while piResult != hwResult and repitions < 10:
@@ -147,6 +148,8 @@ def Div(num1, num2):
 	# Setup variables
 	count = 0
 	adder = num2
+	adder2 = 0
+	adder3 = 0
 	
 	# Insanity test
 	if num2 == 0:
@@ -156,6 +159,8 @@ def Div(num1, num2):
 	while adder <= num1:
 		print("1")
 		OP.CLC()
+		adder3 = adder2
+		adder2 = adder
 		adder = Add(adder, num2)
 		count += 1
 		time.sleep(relayDelay)
@@ -163,13 +168,16 @@ def Div(num1, num2):
 		# This protects against the hw getting locked in a loop
 		# due to the relays not switching. Return doesn't matter
 		# due to hwResult = piResult assignment.
-		if count > 256:
+		if adder == adder2 and adder == adder3:
 			return(0)
 	return(count)		
 	
 # Multiplication
 def Mult(num1, num2):
+	count = 0
 	result = 0
+	result2 = 0
+	result3 = 0
 	if num2 > num1:
 		num1 = num1 + num2
 		num2 = num1 - num2
@@ -178,14 +186,15 @@ def Mult(num1, num2):
 		# num1 = num2
 		# num2 = temp
 	for x in range(0, num2):
+		result3 = result2
+		result2 = result
 		result = Add(result, num1)
-		count += 1
 		time.sleep(relayDelay)
 		
 		# This protects against the hw getting locked in a loop
 		# due to the relays not switching. Return doesn't matter
 		# due to hwResult = piResult assignment.
-		if count > 256:
+		if result == result2 and result == result3:
 			return(0)
 	return(result)
 	
